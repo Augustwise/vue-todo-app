@@ -1,5 +1,7 @@
 <script setup>
-import todos from "./data/todos";
+import originalTodos from "./data/todos";
+import { ref } from "vue";
+const todos = ref(originalTodos);
 </script>
 
 <template>
@@ -21,7 +23,7 @@ import todos from "./data/todos";
 
       <section class="todoapp__main">
         <div
-          v-for="todo of todos"
+          v-for="todo, i of todos"
           class="todo"
           :class="{ completed: todo.completed }"
         >
@@ -30,6 +32,7 @@ import todos from "./data/todos";
               type="checkbox"
               class="todo__status"
               :checked="todo.completed"
+              @change="todo.completed = !todo.completed"
             />
           </label>
 
@@ -43,7 +46,9 @@ import todos from "./data/todos";
 
           <template v-else>
             <span class="todo__title">{{ todo.title }}</span>
-            <button class="todo__remove">×</button>
+            <button 
+            class="todo__remove" 
+            @click="todos.splice(i, 1)">×</button>
           </template>
 
           <!-- add `is-active` class when todo being processed -->
@@ -57,7 +62,7 @@ import todos from "./data/todos";
       <!-- Hide the footer if there are no todos -->
       <footer class="todoapp__footer">
         <!-- show the number of not caompleted todos -->
-        <span class="todo-count">3 items left</span>
+        <span class="todo-count">{{ todos.filter(todo => !todo.completed).length }} items left</span>
 
         <!-- Active link should have the 'selected' class -->
         <nav class="filter">
