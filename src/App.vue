@@ -2,6 +2,21 @@
 import originalTodos from "./data/todos";
 import { ref } from "vue";
 const todos = ref(originalTodos);
+const title = ref("");
+const errorMessage = ref("");
+
+function addTodo() {
+  if (title.value.trim() === "") {
+    errorMessage.value = "Title should not be empty";
+    return;
+  }
+  todos.value.push({
+    id: Date.now(),
+    title: title.value,
+    completed: false,
+  });
+  title.value = "";
+}
 </script>
 
 <template>
@@ -13,10 +28,11 @@ const todos = ref(originalTodos);
         <!-- this button should have `active` class only if all todos are completed -->
         <button class="todoapp__toggle-all active"></button>
 
-        <form>
+        <form @submit.prevent="addTodo">
           <input
             class="todoapp__new-todo"
             placeholder="What needs to be done?"
+            v-model="title"
           />
         </form>
       </header>
@@ -31,8 +47,7 @@ const todos = ref(originalTodos);
             <input
               type="checkbox"
               class="todo__status"
-              :checked="todo.completed"
-              @change="todo.completed = !todo.completed"
+              v-model="todo.completed"
             />
           </label>
 
@@ -78,14 +93,10 @@ const todos = ref(originalTodos);
       </footer>
     </div>
 
-    <div class="notification is-danger is-light has-text-weight-normal hidden">
-      <button class="delete"></button>
+    <div class="notification is-danger is-light has-text-weight-normal" :class="{ 'hidden': !errorMessage }">
+      <button class="delete" @click="errorMessage = ''"></button>
       <!-- show only one message at a time -->
-      Unable to load todos<br>
-      Title should not be empty<br>
-      Unable to add a todo<br>
-      Unable to delete a todo<br>
-      Unable to update a todo<br>
+      {{ errorMessage }}
     </div>
   </div>
 </template>
