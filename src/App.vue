@@ -1,9 +1,10 @@
 <script setup>
-import originalTodos from "./data/todos";
-import { ref } from "vue";
-const todos = ref(originalTodos);
+import { ref, computed, onBeforeMount, watch } from "vue";
+
+const todos = ref([]);
 const title = ref("");
 const errorMessage = ref("");
+const status = ref("all");
 
 function addTodo() {
   if (title.value.trim() === "") {
@@ -17,6 +18,26 @@ function addTodo() {
   });
   title.value = "";
 }
+
+const visibleTodos = computed(() => {
+  if (status.value === "active") {
+    return todos.value.filter(todo => !todo.completed);
+  }
+  if (status.value === "completed") {
+    return todos.value.filter(todo => todo.completed);
+  }
+  return todos.value;
+});
+
+const activeTodos = computed(() => todos.value.filter(todo => !todo.completed));
+
+watch(todos, newTodos => {
+  localStorage.setItem("todos", JSON.stringify(newTodos));
+}, { deep: true });
+
+onBeforeMount(() => {
+  todos.value = JSON.parse(localStorage.getItem("todos")) || [];
+});
 </script>
 
 <template>
@@ -26,7 +47,11 @@ function addTodo() {
     <div class="todoapp__content">
       <header class="todoapp__header">
         <!-- this button should have `active` class only if all todos are completed -->
-        <button class="todoapp__toggle-all active"></button>
+        <button 
+        v-if="activeTodos.length === 0"
+        class="todoapp__toggle-all"
+        :class="{ 'active': activeTodos.length === 0 }"
+        ></button>
 
         <form @submit.prevent="addTodo">
           <input
@@ -39,7 +64,7 @@ function addTodo() {
 
       <section class="todoapp__main">
         <div
-          v-for="todo, i of todos"
+          v-for="todo, i of visibleTodos"
           class="todo"
           :class="{ completed: todo.completed }"
         >
@@ -77,17 +102,23 @@ function addTodo() {
       <!-- Hide the footer if there are no todos -->
       <footer class="todoapp__footer">
         <!-- show the number of not caompleted todos -->
-        <span class="todo-count">{{ todos.filter(todo => !todo.completed).length }} items left</span>
+        <span class="todo-count">{{ activeTodos.length }} items left</span>
 
         <!-- Active link should have the 'selected' class -->
         <nav class="filter">
-          <a href="#/" class="filter__link selected">All</a>
-          <a href="#/active" class="filter__link">Active</a>
-          <a href="#/completed" class="filter__link">Completed</a>
+          <a href="#/" 
+          class="filter__link" :class="{ 'selected': status === 'all' }" @click="status = 'all'"
+          >All</a>
+          <a href="#/active" class="filter__link" :class="{ 'selected': status === 'active' }" @click="status = 'active'">Active</a>
+          <a href="#/completed" class="filter__link" :class="{ 'selected': status === 'completed' }" @click="status = 'completed'">Completed</a>
         </nav>
 
         <!-- this button should be disabled if there are no completed todos -->
-        <button class="todoapp__clear-completed">
+        <button 
+        class="todoapp__clear-completed"
+        :disabled="activeTodos.length === todos.length"
+        @click="todos = activeTodos"
+        >
           Clear completed
         </button>
       </footer>
