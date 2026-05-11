@@ -3,4 +3,4 @@ export default [
   { id: 2, completed: false, title: 'JS' },
   { id: 3, completed: false, title: 'React' },
   { id: 4, completed: false, title: 'Vue.js' },
-];
+]
