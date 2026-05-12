@@ -64,15 +64,21 @@ onBeforeMount(() => {
         </form>
       </header>
 
-      <section class="todoapp__main">
+      <TransitionGroup
+        tag="section"
+        name="todolist"
+        class="todoapp__main"
+        v-if="todos.length > 0"
+      >
         <TodoItem
           v-for="todo of visibleTodos"
           :key="todo.id"
           :todo="todo"
           @toggle="todo.completed = !todo.completed"
           @remove="todos.splice(todos.indexOf(todo), 1)"
+          @update="updatedTodo => Object.assign(todo, updatedTodo)"
         />
-      </section>
+      </TransitionGroup>
 
       <!-- Hide the footer if there are no todos -->
       <footer class="todoapp__footer">
@@ -101,4 +107,19 @@ onBeforeMount(() => {
       {{ errorMessage }}
     </div>
   </div>
+
 </template>
+
+  <style scoped>
+  .todolist-enter-active,
+  .todolist-leave-active {
+    max-height: 60px;
+    transition: all 0.5s ease;
+  }
+  .todolist-enter-from,
+  .todolist-leave-to {
+    opacity: 0;
+    max-height: 0;
+    transform: scaleY(0);
+  }
+</style>
