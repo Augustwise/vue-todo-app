@@ -3,6 +3,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import StatusFilter from './components/StatusFilter.vue'
 import TodoItem from './components/TodoItem.vue'
 import { getTodos, createTodo, updateTodo, deleteTodo } from './api/todos'
+import Message from './components/Message.vue'
 
 const todos = ref([])
 const title = ref('')
@@ -10,27 +11,39 @@ const errorMessage = ref('')
 const status = ref('all')
 
 const addTodo = async () => {
-  if (!title.value) return
-
-  const newTodo = await createTodo(title.value)
-
-  todos.value.push(newTodo)
-  title.value = ''
+  if (!title.value) {
+    errorMessage.value = 'Title should not be empty'
+    return
+  }
+  try {
+    const newTodo = await createTodo(title.value)
+    todos.value.push(newTodo)
+  } catch (error) {
+    errorMessage.value = 'Unable to add a todo'
+  } finally {
+    title.value = ''
+  }
 }
 
 const removeTodo = async todo => {
-  await deleteTodo(todo.id)
-
-  todos.value.splice(todos.value.indexOf(todo), 1)
+  try {
+    await deleteTodo(todo.id)
+    todos.value.splice(todos.value.indexOf(todo), 1)
+  } catch (error) {
+    errorMessage.value = 'Unable to delete a todo'
+  }
 }
 
 const renameTodo = async (todo, title) => {
-  const updatedTodo = await updateTodo({
-    ...todo,
-    title,
-  })
-
-  Object.assign(todo, updatedTodo)
+  try {
+    const updatedTodo = await updateTodo({
+      ...todo,
+      title,
+    })
+    Object.assign(todo, updatedTodo)
+  } catch (error) {
+    errorMessage.value = 'Unable to update a todo'
+  }
 }
 
 const visibleTodos = computed(() => {
@@ -54,7 +67,11 @@ watch(
 )
 
 onMounted(async () => {
-  todos.value = await getTodos()
+  try {
+    todos.value = await getTodos()
+  } catch (error) {
+    errorMessage.value = 'Unable to load todos'
+  }
 })
 </script>
 
