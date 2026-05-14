@@ -1,6 +1,12 @@
 <script setup>
 import { ref, nextTick } from 'vue'
-const props = defineProps(['todo'])
+
+const props = defineProps({
+  todo: {
+    type: Object,
+    required: true,
+  },
+})
 
 const emit = defineEmits(['remove', 'toggle', 'update'])
 const editing = ref(false)
