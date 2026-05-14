@@ -1,24 +1,36 @@
 <script setup>
-import { ref, computed, onBeforeMount, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import StatusFilter from './components/StatusFilter.vue'
 import TodoItem from './components/TodoItem.vue'
+import { getTodos, createTodo, updateTodo, deleteTodo } from './api/todos'
 
 const todos = ref([])
 const title = ref('')
 const errorMessage = ref('')
 const status = ref('all')
 
-function addTodo() {
-  if (title.value.trim() === '') {
-    errorMessage.value = 'Title should not be empty'
-    return
-  }
-  todos.value.push({
-    id: Date.now(),
-    title: title.value,
-    completed: false,
-  })
+const addTodo = async () => {
+  if (!title.value) return
+
+  const newTodo = await createTodo(title.value)
+
+  todos.value.push(newTodo)
   title.value = ''
+}
+
+const removeTodo = async todo => {
+  await deleteTodo(todo.id)
+
+  todos.value.splice(todos.value.indexOf(todo), 1)
+}
+
+const renameTodo = async (todo, title) => {
+  const updatedTodo = await updateTodo({
+    ...todo,
+    title,
+  })
+
+  Object.assign(todo, updatedTodo)
 }
 
 const visibleTodos = computed(() => {
@@ -41,8 +53,8 @@ watch(
   { deep: true }
 )
 
-onBeforeMount(() => {
-  todos.value = JSON.parse(localStorage.getItem('todos')) || []
+onMounted(async () => {
+  todos.value = await getTodos()
 })
 </script>
 
@@ -64,19 +76,14 @@ onBeforeMount(() => {
         </form>
       </header>
 
-      <TransitionGroup
-        tag="section"
-        name="todolist"
-        class="todoapp__main"
-        v-if="todos.length > 0"
-      >
+      <TransitionGroup v-if="todos.length > 0" tag="section" name="todolist" class="todoapp__main">
         <TodoItem
           v-for="todo of visibleTodos"
           :key="todo.id"
           :todo="todo"
           @toggle="todo.completed = !todo.completed"
-          @remove="todos.splice(todos.indexOf(todo), 1)"
-          @update="updatedTodo => Object.assign(todo, updatedTodo)"
+          @remove="removeTodo(todo)"
+          @update="updatedTodo => renameTodo(todo, updatedTodo.title)"
         />
       </TransitionGroup>
 
@@ -107,19 +114,18 @@ onBeforeMount(() => {
       {{ errorMessage }}
     </div>
   </div>
-
 </template>
 
-  <style scoped>
-  .todolist-enter-active,
-  .todolist-leave-active {
-    max-height: 60px;
-    transition: all 0.5s ease;
-  }
-  .todolist-enter-from,
-  .todolist-leave-to {
-    opacity: 0;
-    max-height: 0;
-    transform: scaleY(0);
-  }
+<style scoped>
+.todolist-enter-active,
+.todolist-leave-active {
+  max-height: 60px;
+  transition: all 0.5s ease;
+}
+.todolist-enter-from,
+.todolist-leave-to {
+  opacity: 0;
+  max-height: 0;
+  transform: scaleY(0);
+}
 </style>

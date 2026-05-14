@@ -3,37 +3,36 @@ import { ref, nextTick } from 'vue'
 const props = defineProps(['todo'])
 
 const emit = defineEmits(['remove', 'toggle', 'update'])
-const editing = ref(false);
-const titleField = ref(null);
+const editing = ref(false)
+const titleField = ref(null)
 const newTitle = ref(props.todo.title)
 
 const startEditing = async () => {
-  newTitle.value = props.todo.title;
-  editing.value = true;
+  newTitle.value = props.todo.title
+  editing.value = true
 
-  await nextTick();
+  await nextTick()
 
   if (titleField.value) {
-    titleField.value.focus();
+    titleField.value.focus()
   }
-};
-
-const rename = () => {
-  if (!editing.value) return;
-  editing.value = false;
-
-  if (newTitle.value === props.todo.title) {
-    return;
-  }
-  
-  if (!newTitle.value) {
-    emit('remove');
-    return;
-  }
-  
-  emit('update', { ...props.todo, title: newTitle.value });
 }
 
+const rename = () => {
+  if (!editing.value) return
+  editing.value = false
+
+  if (newTitle.value === props.todo.title) {
+    return
+  }
+
+  if (!newTitle.value) {
+    emit('remove')
+    return
+  }
+
+  emit('update', { ...props.todo, title: newTitle.value })
+}
 </script>
 
 <template>
@@ -50,9 +49,9 @@ const rename = () => {
     <!-- show when todo is being edited -->
     <form v-if="editing" @submit.prevent="rename" @keyup.escape="editing = false">
       <input
+        ref="titleField"
         v-model.trim="newTitle"
         class="todo__title-field"
-        ref="titleField"
         placeholder="Empty todo will be deleted"
         @blur="rename"
       />
