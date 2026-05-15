@@ -1,5 +1,5 @@
 <script setup>
-  defineProps({ text: String });
+defineProps({ text: String })
 </script>
 
 <template>
@@ -14,15 +14,15 @@
 </template>
 
 <style scoped lang="scss">
-  .message {
-    transform-origin: top center;
-    transition-property: opacity, transform;
-    transition-duration: 0.3s;
+.message {
+  transform-origin: top center;
+  transition-property: opacity, transform;
+  transition-duration: 0.3s;
 
-    &--hidden {
-      transform: scaleY(0);
-      opacity: 0;
-      pointer-events: none;
-    }
+  &--hidden {
+    transform: scaleY(0);
+    opacity: 0;
+    pointer-events: none;
   }
+}
 </style>

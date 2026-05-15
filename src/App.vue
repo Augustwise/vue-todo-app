@@ -3,7 +3,6 @@ import { ref, computed, watch, onMounted } from 'vue'
 import StatusFilter from './components/StatusFilter.vue'
 import TodoItem from './components/TodoItem.vue'
 import { getTodos, createTodo, updateTodo, deleteTodo } from './api/todos'
-import Message from './components/Message.vue'
 
 const todos = ref([])
 const title = ref('')
